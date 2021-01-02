@@ -28,8 +28,18 @@ class Query:
         doc_snapshots = self.parent.stream()
 
         for field, compare, value in self._field_filters:
-            doc_snapshots = [doc_snapshot for doc_snapshot in doc_snapshots
-                             if compare(doc_snapshot._get_by_field_path(field), value)]
+            valid_items = []
+            for doc_snapshot in doc_snapshots:
+                try:
+                    if compare(doc_snapshot._get_by_field_path(field), value):
+                        valid_items.append(doc_snapshot)
+                except KeyError:
+                    # NOTE: When you're performing comparisons with non-equality based operators,
+                    # with mismatched item schemas, firestore handles this gracefully by ignoring
+                    # the entry.
+                    continue
+
+            doc_snapshots = valid_items
 
         if self.orders:
             for key, direction in self.orders:

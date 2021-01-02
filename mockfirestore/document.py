@@ -30,10 +30,10 @@ class DocumentSnapshot:
         return timestamp
 
     def _get_by_field_path(self, field_path: str) -> Any:
-        try:
-            return reduce(operator.getitem, field_path.split('.'), self._doc)
-        except KeyError:
-            return None
+        """
+        :raises: KeyError
+        """
+        return reduce(operator.getitem, field_path.split('.'), self._doc)
 
 
 class DocumentReference:
